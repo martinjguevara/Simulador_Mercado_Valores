@@ -1,18 +1,20 @@
 package simuladorMercado.agentes;
 
-import simuladorMercado.mercado.Mercado;
 import simuladorMercado.estrategia.EstrategiaOperacion;
+import simuladorMercado.mercado.Mercado;
+import simuladorMercado.mercado.Operacion;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class Agente implements Runnable{
+public class Agente implements Runnable {
     private final String nombre;
     private double dineroDisponible;
     private final Map<String, Integer> portafolio;
     private final EstrategiaOperacion estrategia;
     private final Mercado mercado;
+    private volatile Operacion ultimaOperacion;
 
     public Agente(String nombre, double dineroInicial, EstrategiaOperacion estrategia, Mercado mercado) {
         this.nombre = nombre;
@@ -34,7 +36,7 @@ public class Agente implements Runnable{
             dineroDisponible += cantidad * precioUnitario;
         }
     }
-    
+
     public int getCantidad(String simbolo) {
         return portafolio.getOrDefault(simbolo, 0);
     }
@@ -49,6 +51,14 @@ public class Agente implements Runnable{
 
     public double getDineroDisponible() {
         return dineroDisponible;
+    }
+
+    public Operacion getUltimaOperacion() {
+        return ultimaOperacion;
+    }
+
+    public void setUltimaOperacion(Operacion operacion) {
+        this.ultimaOperacion = operacion;
     }
 
     @Override

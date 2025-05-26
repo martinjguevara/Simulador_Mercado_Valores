@@ -35,4 +35,4 @@ public class Accion {
     public Queue<Double> getHistorialPrecios() {
         return historialPrecios;
     }
-}
+} 

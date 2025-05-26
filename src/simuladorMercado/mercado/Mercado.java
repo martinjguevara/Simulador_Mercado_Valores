@@ -9,15 +9,16 @@ public class Mercado {
     private final Map<String, Accion> acciones;
     private boolean activo = true;
 
-    public Mercado(Map<String, Accion> acciones) {
+    public Mercado() {
         this.acciones = new ConcurrentHashMap<>();
-        acciones.put("APPL", new Accion("APPL", 150.0));
+        acciones.put("AAPL", new Accion("AAPL", 150.0));
         acciones.put("GOOG", new Accion("GOOG", 2800.0));
+        acciones.put("TSLA", new Accion("TSLA", 700.0));
     }
 
-    public void fluctuacion() {
+    public void fluctuacionAleatoria() {
         Random rand = new Random();
-        for (Accion accion: acciones.values()) {
+        for (Accion accion : acciones.values()) {
             double variacion = (rand.nextDouble() - 0.5) * 10; // +-5%
             double nuevoPrecio = Math.max(1, accion.getPrecioActual() + variacion);
             accion.actualizarPrecio(nuevoPrecio);
