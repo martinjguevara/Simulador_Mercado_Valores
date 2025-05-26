@@ -2,6 +2,7 @@ package simuladorMercado;
 
 import simuladorMercado.mercado.Mercado;
 import simuladorMercado.mercado.Operacion;
+import simuladorMercado.mercado.OperacionConAgente;
 import simuladorMercado.agentes.Agente;
 import simuladorMercado.estrategia.EstrategiaAleatoria;
 
@@ -21,36 +22,61 @@ public class Main {
             hilos.add(t);
             t.start();
         }
-        System.out.printf("%-43s | %-43s\n", "[ COMPRA ]", "[ VENTA ]");
-        System.out.printf("%-10s %-10s %-10s %-10s | %-10s %-10s %-10s %-10s\n",
-                "Activo", "Valor", "Cantidad", "Total", "Activo", "Valor", "Cantidad", "Total");
-        for (int i = 0; i < 20; i++) {
+        System.out.printf("%-54s | %-54s\n", "[ COMPRA ]", "[ VENTA ]");
+        System.out.printf("%-10s %-10s %-10s %-10s %-10s | %-10s %-10s %-10s %-10s %-10s\n",
+                "Agente", "Activo", "Valor", "Cantidad", "Total", "Agente", "Activo", "Valor", "Cantidad", "Total");
+        for (int i = 0; i < 20; i++) { 
             mercado.fluctuacionAleatoria();
-            for (Agente agente : agentes) {
-                Operacion op = agente.getUltimaOperacion();
-                String compraStr = "-", ventaStr = "-";
-                if (op != null) {
-                    if (op.getTipo() == Operacion.Tipo.COMPRA) {
-                        compraStr = String.format("%-10s %-10.2f %-10d %-10.2f",
-                                op.getSimbolo(), op.getValor(), op.getCantidad(), op.getTotal());
-                        ventaStr = String.format("%-10s %-10s %-10s %-10s", "-", "-", "-", "-");
-                    } else {
-                        ventaStr = String.format("%-10s %-10.2f %-10d %-10.2f",
-                                op.getSimbolo(), op.getValor(), op.getCantidad(), op.getTotal());
-                        compraStr = String.format("%-10s %-10s %-10s %-10s", "-", "-", "-", "-");
-                    }
+            try {
+                Thread.sleep(100); 
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            List<OperacionConAgente> operacionesDelCiclo = mercado.obtenerOperacionesPendientes();
+            List<OperacionConAgente> compras = new ArrayList<>();
+            List<OperacionConAgente> ventas = new ArrayList<>();
+            for (OperacionConAgente opConAgente : operacionesDelCiclo) {
+                if (opConAgente.getOperacion().getTipo() == Operacion.Tipo.COMPRA) {
+                    compras.add(opConAgente);
                 } else {
-                    compraStr = String.format("%-10s %-10s %-10s %-10s", "-", "-", "-", "-");
-                    ventaStr = String.format("%-10s %-10s %-10s %-10s", "-", "-", "-", "-");
+                    ventas.add(opConAgente);
+                }
+            }
+            int maxOps = Math.max(compras.size(), ventas.size());
+            for (int j = 0; j < maxOps; j++) {
+                String compraStr = String.format("%-10s %-10s %-10s %-10s %-10s", "-", "-", "-", "-", "-");
+                String ventaStr = String.format("%-10s %-10s %-10s %-10s %-10s", "-", "-", "-", "-", "-");
+                if (j < compras.size()) {
+                    OperacionConAgente opA = compras.get(j);
+                    compraStr = String.format("%-10s %-10s %-10.2f %-10d %-10.2f",
+                            opA.getNombreAgente(), opA.getOperacion().getSimbolo(), opA.getOperacion().getValor(),
+                            opA.getOperacion().getCantidad(), opA.getOperacion().getTotal());
+                }
+                if (j < ventas.size()) {
+                    OperacionConAgente opB = ventas.get(j);
+                    ventaStr = String.format("%-10s %-10s %-10.2f %-10d %-10.2f",
+                            opB.getNombreAgente(), opB.getOperacion().getSimbolo(), opB.getOperacion().getValor(),
+                            opB.getOperacion().getCantidad(), opB.getOperacion().getTotal());
                 }
                 System.out.printf("%s | %s\n", compraStr, ventaStr);
             }
+            if (maxOps == 0) {
+                 System.out.printf("%-55s | %-55s\n", String.format("%-10s %-10s %-10s %-10s %-10s", "-", "-", "-", "-", "-"),
+                                    String.format("%-10s %-10s %-10s %-10s %-10s", "-", "-", "-", "-", "-"));
+            }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1000); 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
         mercado.cerrarMercado();
+        for (Thread t : hilos) {
+            try {
+                t.join(2000); 
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }
