@@ -24,16 +24,33 @@ public class Agente implements Runnable {
         this.portafolio = new HashMap<>();
     }
 
-    public void comprar(String simbolo, int cantidad, double precioUnitario) {
-        dineroDisponible -= cantidad * precioUnitario;
-        portafolio.merge(simbolo, cantidad, Integer::sum);
+    public synchronized void comprar(String simbolo, int cantidad, double precioUnitario) {
+        if (cantidad <= 0 || precioUnitario <= 0) {
+            ultimaOperacion = null;
+            return;
+        }
+        double costo = cantidad * precioUnitario;
+        if (dineroDisponible >= costo) { 
+            dineroDisponible -= costo; 
+            portafolio.merge(simbolo, cantidad, Integer::sum);
+            setUltimaOperacion(new Operacion(Operacion.Tipo.COMPRA, simbolo, precioUnitario, cantidad)); // [cite: 64]
+        } else {
+            setUltimaOperacion(null); 
+        }
     }
 
-    public void vender(String simbolo, int cantidad, double precioUnitario) {
-        int actuales = portafolio.getOrDefault(simbolo, 0);
-        if (actuales >= cantidad) {
-            portafolio.put(simbolo, actuales - cantidad);
-            dineroDisponible += cantidad * precioUnitario;
+    public synchronized void vender(String simbolo, int cantidad, double precioUnitario) {
+        if (cantidad <= 0 || precioUnitario <= 0) {
+            ultimaOperacion = null;
+            return;
+        }
+        int actuales = portafolio.getOrDefault(simbolo, 0); 
+        if (actuales >= cantidad) { 
+            portafolio.put(simbolo, actuales - cantidad); 
+            dineroDisponible += cantidad * precioUnitario; 
+            setUltimaOperacion(new Operacion(Operacion.Tipo.VENTA, simbolo, precioUnitario, cantidad)); // [cite: 72]
+        } else {
+            setUltimaOperacion(null);
         }
     }
 

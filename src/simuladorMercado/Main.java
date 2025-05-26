@@ -21,29 +21,29 @@ public class Main {
             hilos.add(t);
             t.start();
         }
-        System.out.printf("%-10s | %-30s | %-30s\n", "Agente", "[ COMPRA ]", "[ VENTA ]");
-        System.out.printf("%-10s | %-10s %-10s %-10s | %-10s %-10s %-10s\n",
-                "", "Activo", "Valor", "Cantidad", "Activo", "Valor", "Cantidad");
-        for (int i = 0; i < 30; i++) {
+        System.out.printf("%-43s | %-43s\n", "[ COMPRA ]", "[ VENTA ]");
+        System.out.printf("%-10s %-10s %-10s %-10s | %-10s %-10s %-10s %-10s\n",
+                "Activo", "Valor", "Cantidad", "Total", "Activo", "Valor", "Cantidad", "Total");
+        for (int i = 0; i < 20; i++) {
             mercado.fluctuacionAleatoria();
             for (Agente agente : agentes) {
                 Operacion op = agente.getUltimaOperacion();
                 String compraStr = "-", ventaStr = "-";
                 if (op != null) {
                     if (op.getTipo() == Operacion.Tipo.COMPRA) {
-                        compraStr = String.format("%-10s %-10.2f %-10d",
-                                op.getSimbolo(), op.getValor(), op.getCantidad());
-                        ventaStr = String.format("%-10s %-10s %-10s", "-", "-", "-");
+                        compraStr = String.format("%-10s %-10.2f %-10d %-10.2f",
+                                op.getSimbolo(), op.getValor(), op.getCantidad(), op.getTotal());
+                        ventaStr = String.format("%-10s %-10s %-10s %-10s", "-", "-", "-", "-");
                     } else {
-                        ventaStr = String.format("%-10s %-10.2f %-10d",
-                                op.getSimbolo(), op.getValor(), op.getCantidad());
-                        compraStr = String.format("%-10s %-10s %-10s", "-", "-", "-");
+                        ventaStr = String.format("%-10s %-10.2f %-10d %-10.2f",
+                                op.getSimbolo(), op.getValor(), op.getCantidad(), op.getTotal());
+                        compraStr = String.format("%-10s %-10s %-10s %-10s", "-", "-", "-", "-");
                     }
                 } else {
-                    compraStr = String.format("%-10s %-10s %-10s", "-", "-", "-");
-                    ventaStr = String.format("%-10s %-10s %-10s", "-", "-", "-");
+                    compraStr = String.format("%-10s %-10s %-10s %-10s", "-", "-", "-", "-");
+                    ventaStr = String.format("%-10s %-10s %-10s %-10s", "-", "-", "-", "-");
                 }
-                System.out.printf("%-10s | %s | %s\n", agente.getNombre(), compraStr, ventaStr);
+                System.out.printf("%s | %s\n", compraStr, ventaStr);
             }
             try {
                 Thread.sleep(1000);

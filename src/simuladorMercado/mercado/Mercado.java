@@ -4,10 +4,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Mercado {
     private final Map<String, Accion> acciones;
-    private boolean activo = true;
+    private volatile boolean activo = true;
+    private final ReentrantLock mercadoLock = new ReentrantLock();
 
     public Mercado() {
         this.acciones = new ConcurrentHashMap<>();
@@ -17,16 +19,26 @@ public class Mercado {
     }
 
     public void fluctuacionAleatoria() {
-        Random rand = new Random();
-        for (Accion accion : acciones.values()) {
-            double variacion = (rand.nextDouble() - 0.5) * 10; // +-5%
-            double nuevoPrecio = Math.max(1, accion.getPrecioActual() + variacion);
-            accion.actualizarPrecio(nuevoPrecio);
+        mercadoLock.lock();
+        try {
+            Random rand = new Random();
+            for (Accion accion : acciones.values()) {
+                double variacion = (rand.nextDouble() - 0.5) * 10; // +-5%
+                double nuevoPrecio = Math.max(1, accion.getPrecioActual() + variacion);
+                accion.actualizarPrecio(nuevoPrecio);
+            }
+        } finally {
+            mercadoLock.unlock();
         }
     }
 
     public Accion getAccion(String simbolo) {
-        return acciones.get(simbolo);
+        mercadoLock.lock();
+        try {
+            return acciones.get(simbolo);
+        } finally {
+            mercadoLock.unlock();
+        } 
     }
 
     public Set<String> obtenerSimbolos() {
