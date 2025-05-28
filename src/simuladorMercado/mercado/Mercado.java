@@ -28,6 +28,7 @@ public class Mercado {
         acciones.put("AAPL", new Accion("AAPL", 300.0)); 
         acciones.put("GOOG", new Accion("GOOG", 2000.0)); 
         acciones.put("TSLA", new Accion("TSLA", 700.0)); 
+        acciones.put("BTCN", new Accion("BTCN", 4000.0)); 
     }
 
     /**

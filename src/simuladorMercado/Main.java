@@ -44,7 +44,7 @@ public class Main {
                 "Agente", "Activo", "Valor", "Cantidad", "Total", "Agente", "Activo", "Valor", "Cantidad", "Total");
 
         // Bucle principal de la simulacion
-        for (int i = 0; i < NUM_CICLOS_SIMULACION; i++) { // [cite: 214]
+        for (int i = 0; i < NUM_CICLOS_SIMULACION; i++) { 
             try {
                 // Pausa para permitir que los agentes generen operaciones antes de recolectarlas para este ciclo de impresion.
                 Thread.sleep(500); 
@@ -93,7 +93,7 @@ public class Main {
                 }
             }
             try {
-                Thread.sleep(1000); // Pausa entre cada ciclo de recoleccion/impresion 
+                Thread.sleep(500); // Pausa entre cada ciclo de recoleccion/impresion 
             } catch (InterruptedException e) { 
                 Thread.currentThread().interrupt(); 
             }
