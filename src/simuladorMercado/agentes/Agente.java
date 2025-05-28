@@ -38,6 +38,7 @@ public class Agente implements Runnable {
 
     /**
      * Realiza una operacion de compra de una accion.
+     * El metodo esta sincronizado para proteger el estado interno del agente (dinero y portafolio).
      *
      * @param simbolo El simbolo de la accion a comprar.
      * @param cantidad La cantidad de acciones a comprar.
@@ -51,15 +52,16 @@ public class Agente implements Runnable {
         if (dineroDisponible >= costo) { 
             dineroDisponible -= costo; 
             portafolio.merge(simbolo, cantidad, Integer::sum); 
-            // Registra la operacion con el precio al que se realizo
+            // Registra la operacion con el precio al que se realizo.
             mercado.registrarOperacion(new OperacionConAgente(new Operacion(Operacion.Tipo.COMPRA, simbolo, precioUnitario, cantidad), this.nombre)); // [cite: 298]
-            // Ajusta el precio en el mercado despues de la transaccion
+            // Ajusta el precio en el mercado despues de la transaccion.
             mercado.ajustarPrecioPorCompra(simbolo, cantidad);
         }
     }
 
     /**
      * Realiza una operacion de venta de una accion.
+     * El metodo esta sincronizado para proteger el estado interno del agente (dinero y portafolio).
      *
      * @param simbolo El simbolo de la accion a vender.
      * @param cantidad La cantidad de acciones a vender.
@@ -73,9 +75,9 @@ public class Agente implements Runnable {
         if (actuales >= cantidad) { 
             portafolio.put(simbolo, actuales - cantidad); 
             dineroDisponible += cantidad * precioUnitario; 
-            // Registra la operacion con el precio al que se realizo
+            // Registra la operacion con el precio al que se realizo.
             mercado.registrarOperacion(new OperacionConAgente(new Operacion(Operacion.Tipo.VENTA, simbolo, precioUnitario, cantidad), this.nombre)); 
-            // Ajusta el precio en el mercado despues de la transaccion
+            // Ajusta el precio en el mercado despues de la transaccion.
             mercado.ajustarPrecioPorVenta(simbolo, cantidad); 
         }
     }
@@ -123,6 +125,7 @@ public class Agente implements Runnable {
      */
     @Override 
     public void run() {
+        // El bucle continua mientras el mercado este activo Y el hilo no haya sido interrumpido.
         while (mercado.estaActivo() || !Thread.currentThread().isInterrupted()) { // Continuar si el mercado esta activo o si se esta interrumpiendo.
             try {
                 estrategia.ejecutar(mercado, this); // El agente ejecuta su estrategia de operacion. 

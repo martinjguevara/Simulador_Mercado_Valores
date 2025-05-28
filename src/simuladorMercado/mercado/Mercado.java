@@ -24,7 +24,7 @@ public class Mercado {
      * Inicializa las acciones con sus simbolos y precios iniciales.
      */
     public Mercado() {
-        this.acciones = new ConcurrentHashMap<>(); 
+        this.acciones = new ConcurrentHashMap<>();  // ConcurrentHashMap: Para almacenar las acciones.
         acciones.put("AAPL", new Accion("AAPL", 300.0)); 
         acciones.put("GOOG", new Accion("GOOG", 2000.0)); 
         acciones.put("TSLA", new Accion("TSLA", 700.0)); 
@@ -33,21 +33,23 @@ public class Mercado {
     /**
      * Ajusta el precio de una accion al alza debido a una operacion de compra.
      * El aumento de precio es proporcional a la cantidad comprada.
+     * La region critica es el acceso y modificacion del precio de la accion.
      *
      * @param simbolo El simbolo de la accion cuyo precio se va a ajustar.
      * @param cantidad La cantidad de la accion que se compro.
      */
     public void ajustarPrecioPorCompra(String simbolo, int cantidad) { 
+        // Adquiere el bloqueo: Solo un hilo puede ejecutar este bloque a la vez.
         mercadoLock.lock(); 
         try {
             Accion accion = acciones.get(simbolo); 
             if (accion != null) { 
                 double aumento = (double) cantidad * 1.0; // Valor de fluctuacion de compra ajustable
                 double nuevoPrecio = accion.getPrecioActual() + aumento; 
-                accion.actualizarPrecio(nuevoPrecio); 
+                accion.actualizarPrecio(nuevoPrecio); // Modificacion del estado compartido, precio de la accion.
             }
         } finally {
-            mercadoLock.unlock(); 
+            mercadoLock.unlock(); // Libera el bloqueo: Asegura que el bloqueo se libera incluso si ocurre una excepcion.
         }
     }
 

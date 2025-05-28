@@ -14,7 +14,7 @@ import java.util.List;
  * Crea agentes, el mercado y gestiona los ciclos de simulacion, mostrando las operaciones.
  */
 public class Main {
-    private static final int NUM_AGENTES = 4; 
+    private static final int NUM_AGENTES = 5; 
     private static final int NUM_CICLOS_SIMULACION = 30; 
 
     /**
@@ -26,15 +26,16 @@ public class Main {
         Mercado mercado = new Mercado(); 
         EstrategiaAleatoria estrategia = new EstrategiaAleatoria(); 
         List<Agente> agentes = new ArrayList<>(); 
-        List<Thread> hilos = new ArrayList<>(); 
+        List<Thread> hilos = new ArrayList<>(); // Lista para almacenar los hilos de los agentes.
 
         // Inicializacion y lanzamiento de agentes
         for (int i = 1; i <= NUM_AGENTES; i++) { 
             Agente agente = new Agente("Agente" + i, 10000, estrategia, mercado); 
             agentes.add(agente); 
+            // Cada agente es una instancia de Runnable, envuelta en un nuevo Thread.
             Thread t = new Thread(agente); 
             hilos.add(t); 
-            t.start(); 
+            t.start(); // Inicia la ejecucion del hilo del agente en paralelo.
         }
 
         // Impresion de encabezado de la tabla de operaciones
@@ -98,11 +99,11 @@ public class Main {
             }
         }
 
-        // Cierre del mercado y espera a que los hilos de los agentes terminen
+        // Cierre del mercado y gestion de la finalizacion de los hilos.
         mercado.cerrarMercado(); 
         for (Thread t : hilos) { 
             try {
-                t.join(2000); // Esperar un maximo de 2 segundos por cada agente 
+                t.join(2000); // Espera un maximo de 2 segundos a que cada hilo de agente termine su ejecucion
             } catch (InterruptedException e) { 
                 Thread.currentThread().interrupt();
             }
