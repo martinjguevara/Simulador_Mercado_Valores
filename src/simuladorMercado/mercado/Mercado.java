@@ -3,7 +3,6 @@ package simuladorMercado.mercado;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,18 +17,32 @@ public class Mercado {
 
     public Mercado() {
         this.acciones = new ConcurrentHashMap<>();
-        acciones.put("AAPL", new Accion("AAPL", 150.0));
-        acciones.put("GOOG", new Accion("GOOG", 2800.0));
+        acciones.put("AAPL", new Accion("AAPL", 300.0));
+        acciones.put("GOOG", new Accion("GOOG", 2000.0));
         acciones.put("TSLA", new Accion("TSLA", 700.0));
     }
 
-    public void fluctuacionAleatoria() {
+    public void ajustarPrecioPorCompra(String simbolo, int cantidad) {
         mercadoLock.lock();
         try {
-            Random rand = new Random();
-            for (Accion accion : acciones.values()) {
-                double variacion = (rand.nextDouble() - 0.5) * 10;
-                double nuevoPrecio = Math.max(1, accion.getPrecioActual() + variacion);
+            Accion accion = acciones.get(simbolo);
+            if (accion != null) {
+                double aumento = (double) cantidad * 1.0; 
+                double nuevoPrecio = accion.getPrecioActual() + aumento;
+                accion.actualizarPrecio(nuevoPrecio);
+            }
+        } finally {
+            mercadoLock.unlock();
+        }
+    }
+
+    public void ajustarPrecioPorVenta(String simbolo, int cantidad) {
+        mercadoLock.lock();
+        try {
+            Accion accion = acciones.get(simbolo);
+            if (accion != null) {
+                double disminucion = (double) cantidad * 1.0; 
+                double nuevoPrecio = Math.max(1, accion.getPrecioActual() - disminucion);
                 accion.actualizarPrecio(nuevoPrecio);
             }
         } finally {
@@ -55,7 +68,7 @@ public class Mercado {
 
     public void registrarOperacion(OperacionConAgente operacion) {
         if (operacion != null) {
-            operacionesPendientes.offer(operacion); 
+            operacionesPendientes.offer(operacion);
         }
     }
 

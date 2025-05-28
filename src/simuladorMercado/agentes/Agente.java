@@ -26,25 +26,27 @@ public class Agente implements Runnable {
 
     public synchronized void comprar(String simbolo, int cantidad, double precioUnitario) {
         if (cantidad <= 0 || precioUnitario <= 0) {
-            return; 
+            return;
         }
         double costo = cantidad * precioUnitario;
         if (dineroDisponible >= costo) {
             dineroDisponible -= costo;
             portafolio.merge(simbolo, cantidad, Integer::sum);
             mercado.registrarOperacion(new OperacionConAgente(new Operacion(Operacion.Tipo.COMPRA, simbolo, precioUnitario, cantidad), this.nombre));
+            mercado.ajustarPrecioPorCompra(simbolo, cantidad);
         }
     }
 
     public synchronized void vender(String simbolo, int cantidad, double precioUnitario) {
         if (cantidad <= 0 || precioUnitario <= 0) {
-            return; 
+            return;
         }
         int actuales = portafolio.getOrDefault(simbolo, 0);
         if (actuales >= cantidad) {
             portafolio.put(simbolo, actuales - cantidad);
-            dineroDisponible += cantidad * precioUnitario;
+            dineroDisponible += cantidad * precioUnitario; 
             mercado.registrarOperacion(new OperacionConAgente(new Operacion(Operacion.Tipo.VENTA, simbolo, precioUnitario, cantidad), this.nombre));
+            mercado.ajustarPrecioPorVenta(simbolo, cantidad);
         }
     }
 
@@ -66,14 +68,14 @@ public class Agente implements Runnable {
 
     @Override
     public void run() {
-        while (mercado.estaActivo() || !Thread.currentThread().isInterrupted()) { // Continuar si el mercado está activo o si se está interrumpiendo
+        while (mercado.estaActivo() && !Thread.currentThread().isInterrupted()) {
             try {
                 estrategia.ejecutar(mercado, this);
                 Thread.sleep(1000 + new Random().nextInt(2000));
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); 
+                Thread.currentThread().interrupt();
                 System.out.println(nombre + " ha sido interrumpido y está terminando.");
-                break; 
+                break;
             }
         }
         System.out.println(nombre + " ha terminado su ejecución.");
